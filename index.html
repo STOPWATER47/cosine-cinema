@@ -303,6 +303,7 @@ const MX = {'TF-IDF':'Kiwi 형태소 + unigram·bigram TF-IDF','Word2Vec':'Skip-
 const GEN = {'코미디':'Comedy','미스터리':'Mystery','범죄':'Crime','애니메이션':'Animation','스릴러':'Thriller','모험':'Adventure','로맨스':'Romance','SF':'Sci-Fi','판타지':'Fantasy','드라마':'Drama','가족':'Family','다큐멘터리':'Documentary','역사':'History','액션':'Action','음악':'Music'};
 const KW = {'기억':'Memory','추적':'Pursuit','역사':'History','우정':'Friendship','제주':'Jeju','미스터리':'Mystery','언론':'Press','가족':'Family','서울':'Seoul','환경':'Environment','요리':'Cooking','학교':'School','미래':'Future','인공지능':'AI','성장':'Coming of age','로봇':'Robots','공동체':'Community','범죄':'Crime','여행':'Travel','탐정':'Detective','가짜뉴스':'Fake news','사랑':'Love','바다':'Sea','음악':'Music','시간여행':'Time travel'};
 const TONE = {'긴장감 있게':'Tense','따뜻한 시선으로':'Warm'};
+const wa = t => { const c = t.charCodeAt(t.length - 1) - 0xAC00; return c >= 0 && c <= 11171 && c % 28 ? '과' : '와'; };
 const gEn = g => GEN[g] || g, kEn = k => KW[k] || k, gList = m => m.g.join(' · ');
 const ORD = n => n + (n % 10 === 1 && n !== 11 ? 'st' : n % 10 === 2 && n !== 12 ? 'nd' : n % 10 === 3 && n !== 13 ? 'rd' : 'th');
 const $ = id => document.getElementById(id);
@@ -389,13 +390,13 @@ function renderHero(i){
 }
 function cardHTML(j, extra=''){
   const n = M[j];
-  return `<button class="card" data-j="${j}" aria-label="${esc(base(n.t))}로 다시 추천 받기"><div class="pf">${poster(j)}${extra}</div>`;
+  return `<button class="card" data-j="${j}" aria-label="이 영화로 다시 추천 받기: ${esc(base(n.t))}"><div class="pf">${poster(j)}${extra}</div>`;
 }
 function renderPicks(i){
   const m = M[i], cnt = {}, sets = MODELS.map(md => new Set(R[md][i].map(x => x[0])));
   MODELS.forEach(md => R[md][i].forEach(([j]) => cnt[j] = (cnt[j]||0) + 1));
   const all3 = [...sets[0]].filter(j => sets[1].has(j) && sets[2].has(j));
-  let h = `<div class="sh"><h2><em>${esc(base(m.t))}</em>와 비슷한 영화</h2><p>같은 영화를 넣어도 모델마다 고르는 기준이 달라요. 세 모델이 모두 고른 영화부터 보여 드릴게요.</p></div>`;
+  let h = `<div class="sh"><h2><em>${esc(base(m.t))}</em>${wa(base(m.t))} 비슷한 영화</h2><p>같은 영화를 넣어도 모델마다 고르는 기준이 달라요. 세 모델이 모두 고른 영화부터 보여 드릴게요.</p></div>`;
   h += `<div class="common"><div class="side"><h3>세 모델이<br>모두 고른 영화</h3><div class="big">${all3.length}<small>편</small></div><p>단어 빈도·단어 의미·문장 의미, 서로 다른 세 방식이 동시에 추천한 영화라 가장 믿을 만한 추천이에요.</p></div>
     <div class="list">${all3.length ? all3.map(j => cardHTML(j) + `<div class="ct">${esc(base(M[j].t))}</div><div class="cm">${esc(gList(M[j]))} · ★ ${M[j].v.toFixed(1)}</div></button>`).join('') : '<p class="empty">이번에는 세 모델이 모두 고른 영화가 없어요.</p>'}</div></div>`;
   MODELS.forEach((md, mi) => {
